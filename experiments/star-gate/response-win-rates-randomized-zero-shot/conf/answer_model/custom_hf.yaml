@@ -1,0 +1,35 @@
+hydra:
+    run:
+        dir: outputs
+
+model_type: vllm
+name: custom-hf-model-vllm
+shortname: custom_hf
+
+model_config:
+    # HuggingFace model path - can be:
+    #   - HuggingFace Hub: "your-username/your-model-name"
+    #   - Local path: "/path/to/local/model"
+    model: your-username/your-model-name
+    # Cache directory for downloaded models
+    download_dir: /path/to/cache
+    dtype: auto
+    # Adjust tensor_parallel_size based on your GPU setup
+    # For H100 cluster, typically 4 or 8
+    tensor_parallel_size: 1
+    seed: 1
+
+run:
+    batch_size: 50
+    verbose: false
+    completion_config:
+        do_sample: false
+        best_of: 1
+        temperature: 1.0
+        top_p: 1.0
+        top_k: -1
+        max_new_tokens: 700
+        use_beam_search: false
+        presence_penalty: 0
+        frequency_penalty: 0
+        num_return_sequences: 1

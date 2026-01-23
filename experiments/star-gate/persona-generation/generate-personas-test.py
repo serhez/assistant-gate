@@ -25,6 +25,7 @@ from utils import *
 from AG.models.huggingface.hf_inference_model import HFInferenceModel
 from AG.models.openai.azure import AsyncAzureChatLLM
 from AG.models.openai.gpt4 import GPT4Agent
+from AG.models.openrouter.openrouter import AsyncOpenRouterChatLLM, OpenRouterAgent
 from AG.models.vllm_models.inference_model import VLLMInferenceModel
 from paths import *
 
@@ -39,9 +40,14 @@ def main(args: DictConfig) -> None:
     random.seed(1)
     
 
-    # GPT-4 support only atm
-    llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
-    model = GPT4Agent(llm=llm, **args.model.run.completion_config)
+    # Load model (supports both Azure OpenAI and OpenRouter)
+    is_openrouter = "openrouter" in args.model.model_type.lower()
+    if is_openrouter:
+        llm = AsyncOpenRouterChatLLM(**args.model.model_config.get('openrouter_api', {}))
+        model = OpenRouterAgent(llm=llm, **args.model.run.completion_config)
+    else:
+        llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
+        model = GPT4Agent(llm=llm, **args.model.run.completion_config)
 
 
 

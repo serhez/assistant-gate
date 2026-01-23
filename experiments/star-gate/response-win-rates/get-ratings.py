@@ -27,6 +27,7 @@ from utils import *
 from AG.models.huggingface.hf_inference_model import HFInferenceModel
 from AG.models.openai.azure import AsyncAzureChatLLM
 from AG.models.openai.gpt4 import GPT4Agent
+from AG.models.openrouter.openrouter import AsyncOpenRouterChatLLM, OpenRouterAgent
 from AG.models.vllm_models.inference_model import VLLMInferenceModel
 
 
@@ -39,8 +40,14 @@ def main(args: DictConfig) -> None:
     logging.info(f"Loading model {args.qa_model.shortname} for response generation and win-rate computation for {args.split.name}...")
     random.seed(1)
     
-    rating_llm = AsyncAzureChatLLM(**args.rating_model.model_config.azure_api)
-    rating_model = GPT4Agent(llm=rating_llm, **args.rating_model.run.completion_config)
+    # Load rating model (supports both Azure OpenAI and OpenRouter)
+    is_openrouter = "openrouter" in args.rating_model.model_type.lower()
+    if is_openrouter:
+        rating_llm = AsyncOpenRouterChatLLM(**args.rating_model.model_config.get('openrouter_api', {}))
+        rating_model = OpenRouterAgent(llm=rating_llm, **args.rating_model.run.completion_config)
+    else:
+        rating_llm = AsyncAzureChatLLM(**args.rating_model.model_config.azure_api)
+        rating_model = GPT4Agent(llm=rating_llm, **args.rating_model.run.completion_config)
     
     if not os.path.exists(f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}_{args.qa_model_2.shortname}'):
         os.makedirs(f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}_{args.qa_model_2.shortname}')

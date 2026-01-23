@@ -22,6 +22,7 @@ from utils import *
 from AG.models.huggingface.hf_inference_model import HFInferenceModel
 from AG.models.openai.azure import AsyncAzureChatLLM
 from AG.models.openai.gpt4 import GPT4Agent
+from AG.models.openrouter.openrouter import AsyncOpenRouterChatLLM, OpenRouterAgent
 from AG.models.vllm_models.inference_model import VLLMInferenceModel
 from paths import *
 
@@ -37,14 +38,18 @@ def main(args: DictConfig) -> None:
     
     # Load model
     is_openai = "openai" in args.model.model_type.lower()
+    is_openrouter = "openrouter" in args.model.model_type.lower()
     is_vllm = "vllm" in args.model.model_type.lower()
-    if not (is_openai or is_vllm):
+    if not (is_openai or is_openrouter or is_vllm):
         logging.info("Model type not yet supported.")
         return -1
-    
+
     if is_openai:
         llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
         model = GPT4Agent(llm=llm, **args.model.run.completion_config)
+    elif is_openrouter:
+        llm = AsyncOpenRouterChatLLM(**args.model.model_config.get('openrouter_api', {}))
+        model = OpenRouterAgent(llm=llm, **args.model.run.completion_config)
     elif is_vllm:
         model = VLLMInferenceModel(**args.model.model_config)
         BOS_TOKEN, EOS_TOKEN, B_INST, E_INST = '<s>', '</s>', '[INST]', '[/INST]'
@@ -80,7 +85,7 @@ def main(args: DictConfig) -> None:
             # Generate a list of formatted prompts for the current batch
             formatted_prompts = [GENERATION_PROMPTS[args.GENERATION_PROMPT_IDX].format(persona, prompt) for prompt in prompt_batch]
             
-            if is_openai:
+            if is_openai or is_openrouter:
                 # Adjust for batch processing
                 responses = model.batch_prompt(system_message=SYS_PROMPTS[args.SYS_PROMPT_IDX], messages=formatted_prompts)
                 responses = flatten_list(responses)
