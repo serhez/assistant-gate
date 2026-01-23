@@ -31,11 +31,8 @@ echo "=============================================="
 echo "Model: ${CUSTOM_MODEL_ID}"
 echo "=============================================="
 
-# Load conda environment
-if [[ -f "${CONDA_PATH}" ]]; then
-    source "${CONDA_PATH}"
-    conda activate "${CONDA_ENV}"
-fi
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
 
 # Create output directories
 mkdir -p "${WINRATE_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"

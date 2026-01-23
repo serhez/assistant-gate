@@ -39,11 +39,8 @@ echo "Model Name: ${CUSTOM_MODEL_NAME}"
 echo "GPUs: ${NUM_GPUS}"
 echo "=============================================="
 
-# Load conda environment
-if [[ -f "${CONDA_PATH}" ]]; then
-    source "${CONDA_PATH}"
-    conda activate "${CONDA_ENV}"
-fi
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
 
 # Create output directories
 mkdir -p "${SIMULATION_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"
