@@ -16,7 +16,7 @@ import gc
 import signal
 from collections import defaultdict, Counter
 from datasets import load_dataset, Dataset
-from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+from vllm.distributed.parallel_state import destroy_model_parallel
 from transformers import AutoTokenizer
 import matplotlib.pyplot as plt
 

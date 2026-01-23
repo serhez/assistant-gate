@@ -30,7 +30,7 @@ training_args:
   learning_rate: 2.0e-05
   num_train_epochs: 1
   save_total_limit: 4
-  evaluation_strategy: epoch
+  eval_strategy: epoch
   seed: 42
   save_strategy: epoch
   report_to: wandb
