@@ -43,7 +43,7 @@ def main(args: DictConfig) -> None:
     # Load model (supports both Azure OpenAI and OpenRouter)
     is_openrouter = "openrouter" in args.model.model_type.lower()
     if is_openrouter:
-        llm = AsyncOpenRouterChatLLM(**args.model.model_config.get('openrouter_api', {}))
+        llm = AsyncOpenRouterChatLLM(**(args.model.model_config.get('openrouter_api') or {}))
         model = OpenRouterAgent(llm=llm, **args.model.run.completion_config)
     else:
         llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)

@@ -6,7 +6,7 @@ model_type: openrouter
 name: openrouter
 
 model_config:
-  openrouter_api:
+  openrouter_api: {}
     # API key is read from OPENROUTER_API_KEY environment variable by default
     # Optionally, you can set site_url and site_name for OpenRouter rankings
     # site_url: "https://your-site.com"

@@ -48,7 +48,7 @@ def main(args: DictConfig) -> None:
         llm = AsyncAzureChatLLM(**args.model.model_config.azure_api)
         model = GPT4Agent(llm=llm, **args.model.run.completion_config)
     elif is_openrouter:
-        llm = AsyncOpenRouterChatLLM(**args.model.model_config.get('openrouter_api', {}))
+        llm = AsyncOpenRouterChatLLM(**(args.model.model_config.get('openrouter_api') or {}))
         model = OpenRouterAgent(llm=llm, **args.model.run.completion_config)
     elif is_vllm:
         model = VLLMInferenceModel(**args.model.model_config)
