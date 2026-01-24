@@ -51,7 +51,6 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: ${TENSOR_PARALLEL_SIZE}
   seed: 1
@@ -90,7 +89,6 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: ${TENSOR_PARALLEL_SIZE}
   seed: 1
@@ -123,7 +121,6 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: 2
   seed: 1
@@ -154,7 +151,6 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: 2
   seed: 1
@@ -182,14 +178,12 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: ${TENSOR_PARALLEL_SIZE}
   seed: 1
 
 tokenizer_config:
   pretrained_model_name_or_path: ${CUSTOM_MODEL_ID}
-  cache_dir: ${MODEL_CACHE_DIR}
   model_max_length: 1024
 
 run:
@@ -227,14 +221,12 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: ${TENSOR_PARALLEL_SIZE}
   seed: 1
 
 tokenizer_config:
   pretrained_model_name_or_path: ${CUSTOM_MODEL_ID}
-  cache_dir: ${MODEL_CACHE_DIR}
   model_max_length: 1024
 
 run:
@@ -272,14 +264,12 @@ shortname: ${CUSTOM_MODEL_NAME}
 
 model_config:
   model: ${CUSTOM_MODEL_ID}
-  download_dir: ${MODEL_CACHE_DIR}
   dtype: auto
   tensor_parallel_size: ${TENSOR_PARALLEL_SIZE}
   seed: 1
 
 tokenizer_config:
   pretrained_model_name_or_path: ${CUSTOM_MODEL_ID}
-  cache_dir: ${MODEL_CACHE_DIR}
   model_max_length: 1024
 
 run:

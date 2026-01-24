@@ -93,11 +93,38 @@ def main(args: DictConfig) -> None:
                     messages=messages,
                 )
     flattened_completions = [item for sublist in completions for item in sublist]
+
+    # Extract or generate names for each persona
+    # Try to extract name from persona text (look for "Name: X" or "My name is X" patterns)
+    # Fall back to generic names if extraction fails
+    names = []
+    for i, persona in enumerate(flattened_completions):
+        name = None
+        # Try common patterns for name extraction
+        import re
+        # Pattern: "Name: John Smith" or "name: John"
+        match = re.search(r'[Nn]ame[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)', persona)
+        if match:
+            name = match.group(1).strip()
+        # Pattern: "My name is John" or "I'm John"
+        if not name:
+            match = re.search(r"(?:My name is|I'm|I am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)", persona)
+            if match:
+                name = match.group(1).strip()
+        # Fallback to generic name
+        if not name:
+            name = f"User {i+1}"
+        names.append(name)
+
     if not os.path.exists(f'{PERSONAS_PATH}/{VERSION_2_BSFT}'):
         os.makedirs(f'{PERSONAS_PATH}/{VERSION_2_BSFT}')
-    
+
     with open(f'{PERSONAS_PATH}/{VERSION_2_BSFT}/{args.split.name}.json', 'w') as f:
-        json.dump(flattened_completions, f)    
+        json.dump(flattened_completions, f)
+
+    # Save names file
+    with open(f'{PERSONAS_PATH}/{VERSION_2_BSFT}/{args.split.name}_NAMES.json', 'w') as f:
+        json.dump(names, f)    
 
 
 if __name__ == '__main__':

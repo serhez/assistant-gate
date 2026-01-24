@@ -8,7 +8,6 @@ shortname: vllm
 
 model_config:
   model: ${oc.env:HUMAN_MODEL_ID,mistralai/Mistral-7B-Instruct-v0.2}
-  download_dir: ${oc.env:MODEL_CACHE_DIR,/tmp/models}
   dtype: auto
   tensor_parallel_size: ${oc.env:TENSOR_PARALLEL_SIZE,4}
   seed: 1

@@ -52,9 +52,11 @@ export SLURM_PARTITION="gpu"
 ./00-setup-custom-model-configs.sh
 
 # Step 1-3: Data preparation (no GPU)
-./01-extract-questions.sh
-./02-generate-personas.sh
-./03-build-gold-responses.sh
+# SKIP THESE if using the original STaR-GATE data (downloaded from Google Drive)
+# The downloaded data already contains prompts, personas, and gold responses
+./01-extract-questions.sh    # Optional: regenerate test prompts
+./02-generate-personas.sh    # Optional: regenerate personas
+./03-build-gold-responses.sh # Optional: regenerate gold responses
 
 # Step 4: Simulate conversations (GPU - SLURM)
 sbatch 04-simulate-conversations.slurm.sh
@@ -80,15 +82,33 @@ sbatch 08-generate-responses.slurm.sh
 | Step | Script | GPU | Description |
 |------|--------|-----|-------------|
 | 0 | `00-setup-custom-model-configs.sh` | No | Create Hydra configs for your model |
-| 1 | `01-extract-questions.sh` | No | Extract tasks from source dataset |
-| 2 | `02-generate-personas.sh` | No | Generate personas (OpenRouter API) |
-| 3 | `03-build-gold-responses.sh` | No | Generate oracle responses (OpenRouter API) |
+| 1 | `01-extract-questions.sh` | No | Extract tasks from source dataset (skip if using downloaded data) |
+| 2 | `02-generate-personas.sh` | No | Generate personas (skip if using downloaded data) |
+| 3 | `03-build-gold-responses.sh` | No | Generate oracle responses (skip if using downloaded data) |
 | 4 | `04-simulate-conversations.slurm.sh` | **Yes** | Simulate multi-turn conversations (vLLM) |
 | 5 | `05-pool-conversations.sh` | No | Pool conversation variants |
 | 6 | `06-compute-log-probs.slurm.sh` | **Yes** | Compute oracle log probabilities (vLLM) |
 | 7 | `07-filter-log-probs.sh` | No | Filter top-k conversations |
 | 8 | `08-generate-responses.slurm.sh` | **Yes** | Generate final responses (vLLM) |
 | 9 | `09-get-ratings.sh` | No | Compute win rates (OpenRouter API) |
+
+## Using Downloaded Data (Recommended)
+
+The original STaR-GATE data is available on [Google Drive](https://drive.google.com/file/d/1nt3J2LPANKvGmcKXhvoKgX7e4K_dJT2m/view?usp=sharing).
+
+1. Download and extract to `star-gate-hgx/` in the project root
+2. Ensure `config.env` has:
+   ```bash
+   export DATA_ROOT="${PROJECT_ROOT}/star-gate-hgx"
+   export VERSION="star-gate"
+   ```
+3. Skip steps 1-3 and start directly from step 4
+
+The downloaded data includes:
+- `prompts/star-gate/test.json` - 50 test task prompts
+- `personas/star-gate/test.json` - 10 test personas
+- `personas/star-gate/test_NAMES.json` - Persona names
+- `gold-responses/star-gate/test.json` - Oracle responses for evaluation
 
 ## Running Without SLURM
 

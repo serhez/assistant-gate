@@ -13,29 +13,48 @@ class VLLMInferenceModel:
     def __init__(
         self,
         model: str,
-        download_dir: str,
         dtype: str,
         tensor_parallel_size: int,
+        download_dir: Optional[str] = None,
         quantization: Optional[str] = "none",
         seed: Optional[int] = 1,
     ):
+        """
+        Initialize vLLM inference model.
+
+        Args:
+            model: HuggingFace model ID (e.g., "mistralai/Mistral-7B-Instruct-v0.2")
+            dtype: Data type for model weights (e.g., "auto", "float16", "bfloat16")
+            tensor_parallel_size: Number of GPUs for tensor parallelism
+            download_dir: Optional custom cache directory. If None, uses HuggingFace's
+                         default cache (controlled by HF_HOME or HF_HUB_CACHE env vars)
+            quantization: Quantization method (e.g., "awq", "gptq") or "none"
+            seed: Random seed for reproducibility
+        """
         self.seed = seed
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            pretrained_model_name_or_path=model,
-            cache_dir=download_dir,
-            token=os.getenv("HF_TOKEN"),
-        )
+
+        # Build kwargs, only including download_dir/cache_dir if explicitly specified
+        tokenizer_kwargs = {
+            "pretrained_model_name_or_path": model,
+            "token": os.getenv("HF_TOKEN"),
+        }
+        llm_kwargs = {
+            "model": model,
+            "dtype": dtype,
+            "tensor_parallel_size": tensor_parallel_size,
+            "quantization": quantization if quantization != "none" else None,
+        }
+
+        if download_dir is not None:
+            tokenizer_kwargs["cache_dir"] = download_dir
+            llm_kwargs["download_dir"] = download_dir
+
+        self.tokenizer = AutoTokenizer.from_pretrained(**tokenizer_kwargs)
 
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.tokenizer.padding_side = "right"
 
-        self.model = LLM(
-            model=model,
-            download_dir=download_dir,
-            dtype=dtype,
-            tensor_parallel_size=tensor_parallel_size,
-            quantization=quantization if quantization != "none" else None,
-        )
+        self.model = LLM(**llm_kwargs)
 
     @property
     def model_type(self):

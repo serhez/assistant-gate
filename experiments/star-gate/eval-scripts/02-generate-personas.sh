@@ -48,5 +48,7 @@ echo "Generating personas for test split using OpenRouter..."
 python generate-personas-test.py model=openrouter split=test
 
 echo ""
-echo "Done! Personas generated at: ${PERSONAS_PATH}/${VERSION}/test.json"
+echo "Done! Personas generated at:"
+echo "  - ${PERSONAS_PATH}/${VERSION}/test.json"
+echo "  - ${PERSONAS_PATH}/${VERSION}/test_NAMES.json"
 echo "Next step: ./03-build-gold-responses.sh"
