@@ -1,0 +1,11 @@
+hydra:
+  run:
+    dir: outputs
+
+# This is a minimal config for rating evaluation.
+# The shortname should match the directory containing responses from step 08.
+# Override via CLI: qa_model.shortname=your-model-name
+
+model_type: custom
+name: custom-model
+shortname: ${oc.env:CUSTOM_MODEL_NAME,custom}

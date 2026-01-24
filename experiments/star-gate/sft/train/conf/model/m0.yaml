@@ -12,10 +12,10 @@ wandb:
 
 model_config:
   pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
-  cache_dir: /scr/andukuri/assistant-gate-hgx/pretrained_models/Mistral-7B-Instruct-v0.2
+  cache_dir: ${oc.env:MODEL_CACHE_DIR,/tmp/models}/Mistral-7B-Instruct-v0.2
 
 tokenizer_config:
   pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
-  cache_dir: /scr/andukuri/assistant-gate-hgx/pretrained_models/Mistral-7B-Instruct-v0.2
+  cache_dir: ${oc.env:MODEL_CACHE_DIR,/tmp/models}/Mistral-7B-Instruct-v0.2
   model_max_length: 1024
 

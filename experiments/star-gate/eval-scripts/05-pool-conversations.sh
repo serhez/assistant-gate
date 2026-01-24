@@ -17,6 +17,9 @@ echo "=============================================="
 echo "Step 5: Pool Conversations (Test Split)"
 echo "=============================================="
 
+# Ensure output directory exists (should already exist from step 04)
+mkdir -p "${SIMULATION_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"
+
 # Navigate to script directory
 cd "${PROJECT_ROOT}/experiments/star-gate/simulate-conversations"
 

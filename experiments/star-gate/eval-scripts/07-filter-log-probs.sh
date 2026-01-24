@@ -19,6 +19,9 @@ echo "=============================================="
 echo "Top-K: ${TOP_K}"
 echo "=============================================="
 
+# Ensure output directory exists (should already exist from step 06)
+mkdir -p "${LOGPROBS_PATH}/${VERSION}/qa-experimental/${CUSTOM_MODEL_NAME}"
+
 # Navigate to script directory
 cd "${PROJECT_ROOT}/experiments/star-gate/log-probs"
 

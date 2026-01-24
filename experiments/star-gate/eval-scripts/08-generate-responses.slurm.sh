@@ -40,20 +40,16 @@ mkdir -p "${WINRATE_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"
 # Navigate to script directory
 cd "${PROJECT_ROOT}/experiments/star-gate/response-win-rates-randomized-zero-shot"
 
-echo "Generating responses from custom model..."
+echo "Generating responses from ${CUSTOM_MODEL_NAME}..."
 python get-responses.py \
     answer_model=${CUSTOM_MODEL_NAME} \
     qa_model=${CUSTOM_MODEL_NAME} \
     split=test
 
-# Also generate baseline responses for comparison
 echo ""
-echo "Generating baseline responses..."
-python get-responses.py \
-    answer_model=baseline \
-    qa_model=baseline \
-    split=test
-
+echo "Done! Responses saved to: ${WINRATE_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}/"
 echo ""
-echo "Done! Responses saved to: ${WINRATE_PATH}/${VERSION}/"
-echo "Next step: ./09-get-ratings.sh"
+echo "To evaluate another model, update CUSTOM_MODEL_ID and CUSTOM_MODEL_NAME in config.env"
+echo "and re-run: ./00-setup-custom-model-configs.sh && sbatch 08-generate-responses.slurm.sh"
+echo ""
+echo "Once you have responses for all models you want to compare, run: ./09-get-ratings.sh"

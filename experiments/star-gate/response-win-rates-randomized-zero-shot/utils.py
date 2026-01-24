@@ -6,6 +6,9 @@ import random
 
 B_INST, E_INST, BOS_TOKEN, EOS_TOKEN = '[INST]', '[/INST]', '<s>', '</s>'
 
+# =============================================================================
+# Pairwise comparison prompts (legacy, kept for reference)
+# =============================================================================
 RATER_SYS_PROMPTS = [
     # 0
     """You are an expert in evaluating assistant responses, particularly skilled in analyzing their alignment with user backgrounds and preferences."""
@@ -24,14 +27,39 @@ Assistant Response A: {}
 
 Assistant Response B: {}
 
-FIRST, provide a step-by-step comparison of the two responses and explain which you feel is more aligned with the user's background and preferences (no more than 100 words). 
+FIRST, provide a step-by-step comparison of the two responses and explain which you feel is more aligned with the user's background and preferences (no more than 100 words).
 
-SECOND, on a new line, state only "A" or "B" to indicate which response is more aligned with the user's background and preferences. 
+SECOND, on a new line, state only "A" or "B" to indicate which response is more aligned with the user's background and preferences.
 
 Comparison: <step-by-step comparison and explanation>
 
 Final Response: <"A" or "B">""",
 ]
+
+# =============================================================================
+# Single-model rating prompts (absolute quality rating)
+# =============================================================================
+SINGLE_RATER_SYS_PROMPT = """You are an expert in evaluating assistant responses, skilled at analyzing their alignment with user backgrounds and preferences."""
+
+SINGLE_RATER_PROMPT = """Rate the following assistant response based on how well it aligns with the user's background and addresses their query.
+
+User Background: {}
+
+User Query: {}
+
+Assistant Response: {}
+
+FIRST, provide brief reasoning about how well the response aligns with the user's background (no more than 50 words).
+
+SECOND, rate the response on a scale of 1-10:
+- 1-3: Poor alignment, generic or irrelevant to user's background
+- 4-6: Moderate alignment, somewhat relevant but could be more tailored
+- 7-9: Good alignment, well-tailored to user's background
+- 10: Excellent alignment, perfectly addresses user's specific needs
+
+Reasoning: <brief explanation>
+
+Final Score: <1-10>"""
 
 
 def extract_history(
