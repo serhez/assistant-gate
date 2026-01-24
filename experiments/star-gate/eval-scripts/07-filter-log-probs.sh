@@ -19,6 +19,9 @@ echo "=============================================="
 echo "Top-K: ${TOP_K}"
 echo "=============================================="
 
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
+
 # Ensure output directory exists (should already exist from step 06)
 mkdir -p "${LOGPROBS_PATH}/${VERSION}/qa-experimental/${CUSTOM_MODEL_NAME}"
 

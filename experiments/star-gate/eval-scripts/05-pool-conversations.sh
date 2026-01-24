@@ -17,6 +17,9 @@ echo "=============================================="
 echo "Step 5: Pool Conversations (Test Split)"
 echo "=============================================="
 
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
+
 # Ensure output directory exists (should already exist from step 04)
 mkdir -p "${SIMULATION_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"
 

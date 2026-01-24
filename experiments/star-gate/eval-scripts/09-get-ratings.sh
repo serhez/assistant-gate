@@ -38,6 +38,9 @@ if [[ -z "${OPENROUTER_API_KEY:-}" || "${OPENROUTER_API_KEY}" == "your-openroute
     exit 1
 fi
 
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
+
 # Create output directory
 mkdir -p "${WINRATE_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}"
 
@@ -63,6 +66,7 @@ echo "  - ${CUSTOM_MODEL_NAME}/test_turn-1_ratings.json  (per-response scores fo
 echo "  - ${CUSTOM_MODEL_NAME}/test_turn-2_ratings.json  (per-response scores for turn 2)"
 echo "  - ${CUSTOM_MODEL_NAME}/test_turn-3_ratings.json  (per-response scores for turn 3)"
 echo "  - ${CUSTOM_MODEL_NAME}/test_summary.json         (aggregate statistics)"
+echo "  - ${CUSTOM_MODEL_NAME}/test_results.json         (detailed results with full context)"
 echo ""
 echo "To evaluate another model:"
 echo "  CUSTOM_MODEL_NAME=other-model ./09-get-ratings.sh"

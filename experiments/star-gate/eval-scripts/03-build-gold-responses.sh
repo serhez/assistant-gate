@@ -25,6 +25,9 @@ if [[ -z "${OPENROUTER_API_KEY:-}" || "${OPENROUTER_API_KEY}" == "your-openroute
     exit 1
 fi
 
+# Activate virtual environment
+source "${VENV_PATH}/bin/activate"
+
 # Create output directory
 mkdir -p "${GOLD_PATH}/${VERSION}"
 
