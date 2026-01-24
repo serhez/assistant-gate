@@ -36,7 +36,7 @@ logging.basicConfig(level=logging.INFO)
 
 @hydra.main(version_base=None, config_path="conf", config_name='train-split-config')
 def main(args: DictConfig) -> None:
-    logging.info(f"Loading GPT-4 and generating personas for {args.split.name} split...")
+    logging.info(f"Loading {args.model.name} and generating personas for {args.split.name} split...")
     random.seed(1)
     
     
