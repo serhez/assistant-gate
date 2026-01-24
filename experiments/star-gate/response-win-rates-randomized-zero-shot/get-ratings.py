@@ -75,6 +75,16 @@ def main(args: DictConfig) -> None:
         prompts = json.load(f)
         prompts = [s.strip() for s in prompts]
 
+    # Load gold/oracle responses for detailed results
+    gold_responses_path = f"{GOLD_PATH}/{VERSION_2_BSFT}/{args.split.name}.json"
+    if os.path.exists(gold_responses_path):
+        with open(gold_responses_path, 'r') as f:
+            gold_responses = json.load(f)
+        logging.info(f"Loaded {len(gold_responses)} gold responses from {gold_responses_path}")
+    else:
+        gold_responses = {}
+        logging.warning(f"Gold responses not found at {gold_responses_path}, detailed results will have empty oracle_response")
+
     # Load responses for the single model
     qa_responses = []
     for i in range(1, args.MAX_TURNS + 1):
@@ -93,6 +103,9 @@ def main(args: DictConfig) -> None:
     # Track all scores for aggregate statistics
     all_scores = []
     turn_scores = {1: [], 2: [], 3: []}
+
+    # Collect detailed results for comprehensive output
+    all_results = []
 
     for t_num, group in enumerate(turn_keys):
         turn = t_num + 1
@@ -122,9 +135,17 @@ def main(args: DictConfig) -> None:
 
         # Parse scores and reasoning
         turn_ratings = {}
-        for key, raw_response in zip(group, rating_messages):
+        for idx, (key, raw_response) in enumerate(zip(group, rating_messages)):
             score = extract_score(raw_response)
             reasoning = extract_reasoning(raw_response)
+
+            # Get prompt and persona indices for this key
+            prompt_idx = group_prompt_indices[idx]
+            persona_idx = group_persona_indices[idx]
+
+            # Get oracle response (gold responses are stored as lists)
+            oracle_response_list = gold_responses.get(key, [])
+            oracle_response = oracle_response_list[0] if oracle_response_list else ""
 
             if score is not None:
                 turn_ratings[key] = {
@@ -140,6 +161,18 @@ def main(args: DictConfig) -> None:
                     "reasoning": reasoning,
                     "raw_response": raw_response
                 }
+
+            # Add to detailed results
+            all_results.append({
+                "key": key,
+                "turn": turn,
+                "prompt": group_prompts[idx],
+                "persona": group_personas[idx],
+                "model_response": group_responses[idx],
+                "oracle_response": oracle_response,
+                "score": score,
+                "reasoning": reasoning
+            })
 
         # Save per-turn ratings
         turn_output_file = f'{output_dir}/{args.split.name}_turn-{turn}_ratings.json'
@@ -169,6 +202,16 @@ def main(args: DictConfig) -> None:
     summary_file = f'{output_dir}/{args.split.name}_summary.json'
     with open(summary_file, 'w') as f:
         json.dump(summary, f, indent=2)
+
+    # Save detailed results with full context
+    results_output = {
+        "metadata": summary,
+        "results": all_results
+    }
+    results_file = f'{output_dir}/{args.split.name}_results.json'
+    with open(results_file, 'w') as f:
+        json.dump(results_output, f, indent=2)
+    logging.info(f"Detailed results saved to: {results_file}")
 
     logging.info(f"=" * 50)
     logging.info(f"RATING SUMMARY for {args.qa_model.shortname}")
