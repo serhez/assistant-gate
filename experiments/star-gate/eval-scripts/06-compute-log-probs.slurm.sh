@@ -19,11 +19,21 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/config.env"
+# Detect PROJECT_ROOT automatically
+if [[ -n "${SLURM_SUBMIT_DIR:-}" ]]; then
+    # SLURM job: user should submit from project root
+    PROJECT_ROOT="${SLURM_SUBMIT_DIR}"
+else
+    # Local run: derive from script location
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+fi
+export PROJECT_ROOT
+
+source "${PROJECT_ROOT}/experiments/star-gate/eval-scripts/config.env"
 
 # Create log directory
-mkdir -p "${SCRIPT_DIR}/logs"
+mkdir -p "${PROJECT_ROOT}/experiments/star-gate/eval-scripts/logs"
 
 echo "=============================================="
 echo "Step 6: Compute Log Probabilities (Test Split)"
