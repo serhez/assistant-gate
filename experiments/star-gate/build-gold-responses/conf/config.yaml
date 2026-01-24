@@ -1,6 +1,7 @@
 defaults:
   - model: gpt4
   - split: A # A, B, or test
+  - _self_
 
 GENERATION_PROMPT_IDX: 2
 SYS_PROMPT_IDX: 0

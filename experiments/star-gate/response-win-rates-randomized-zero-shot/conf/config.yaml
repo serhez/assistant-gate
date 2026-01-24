@@ -3,6 +3,7 @@ defaults:
   - answer_model: m0
   - qa_model: m0
   - split: test
+  - _self_
 
 
 ROLES:

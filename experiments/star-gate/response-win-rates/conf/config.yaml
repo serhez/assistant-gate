@@ -4,6 +4,7 @@ defaults:
   - qa_model: m0
   - qa_model_2: m1
   - split: test
+  - _self_
 
 
 ROLES:

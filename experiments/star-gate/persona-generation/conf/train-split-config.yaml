@@ -5,6 +5,7 @@ hydra:
 defaults:
   - model: gpt4
   - split: A # A or B
+  - _self_
 
   
 PROMPT_IDX: 2
