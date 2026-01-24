@@ -44,8 +44,10 @@ mkdir -p "${PROJECT_ROOT}/experiments/star-gate/eval-scripts/logs"
 echo "=============================================="
 echo "Step 4: Simulate Conversations (Test Split)"
 echo "=============================================="
-echo "Model: ${CUSTOM_MODEL_ID}"
-echo "Model Name: ${CUSTOM_MODEL_NAME}"
+echo "QA Model: ${CUSTOM_MODEL_ID}"
+echo "QA Model Name: ${CUSTOM_MODEL_NAME}"
+echo "Human Model Backend: ${HUMAN_MODEL_BACKEND}"
+echo "Human Model ID: ${HUMAN_MODEL_ID}"
 echo "GPUs: ${NUM_GPUS}"
 echo "=============================================="
 
@@ -71,11 +73,11 @@ for ((turn=1; turn<=MAX_TURNS; turn++)); do
         split=test \
         turn="t${turn}"
 
-    # Generate human responses
+    # Generate human responses (using configured HUMAN_MODEL_BACKEND)
     echo "Generating human responses (turn ${turn})..."
     python generate-human.py \
         qa_model=${CUSTOM_MODEL_NAME} \
-        human_model=${CUSTOM_MODEL_NAME} \
+        human_model=${HUMAN_MODEL_BACKEND} \
         split=test \
         turn="t${turn}"
 done

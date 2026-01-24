@@ -1,0 +1,24 @@
+hydra:
+  run:
+    dir: outputs
+
+model_type: vllm
+name: ${oc.env:HUMAN_MODEL_NAME,vllm-human}
+shortname: vllm
+
+model_config:
+  model: ${oc.env:HUMAN_MODEL_ID,mistralai/Mistral-7B-Instruct-v0.2}
+  download_dir: ${oc.env:MODEL_CACHE_DIR,/tmp/models}
+  dtype: auto
+  tensor_parallel_size: ${oc.env:TENSOR_PARALLEL_SIZE,4}
+  seed: 1
+
+run:
+  batch_size: ${oc.env:VLLM_BATCH_SIZE,100}
+  verbose: false
+  completion_config:
+    do_sample: false
+    temperature: 0
+    top_p: 0.9
+    max_new_tokens: 150
+    num_return_sequences: 1

@@ -1,0 +1,21 @@
+hydra:
+  run:
+    dir: outputs
+
+model_type: openrouter
+name: ${oc.env:HUMAN_MODEL_NAME,openrouter-human}
+shortname: openrouter
+
+model_config:
+  openrouter_api: {}
+    # API key is read from OPENROUTER_API_KEY environment variable by default
+
+run:
+  batch_size: 50  # Smaller batches for API rate limits
+  verbose: false
+  completion_config:
+    # Model ID from environment variable, defaults to DeepSeek v3.2
+    model: ${oc.env:HUMAN_MODEL_ID,deepseek/deepseek-v3.2}
+    max_tokens: 150
+    temperature: 0.7
+    n: 1

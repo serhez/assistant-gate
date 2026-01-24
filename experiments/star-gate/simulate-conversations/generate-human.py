@@ -26,6 +26,7 @@ from AG.models.huggingface.hf_inference_model import HFInferenceModel
 from AG.models.openai.azure import AsyncAzureChatLLM
 from AG.models.openai.gpt4 import GPT4Agent
 from AG.models.vllm_models.inference_model import VLLMInferenceModel
+from AG.models.openrouter.openrouter import AsyncOpenRouterChatLLM, OpenRouterAgent
 from paths import *
 
 # logging
@@ -52,10 +53,20 @@ def main(args: DictConfig) -> None:
     
     if not os.path.exists(f"{SIMULATION_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}"):
         os.makedirs(f"{SIMULATION_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}")
-    
+
     pulled_conversations = json.load(open(f"{SIMULATION_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}.json", 'r'))
     output_conversations = defaultdict(list)
-    human_model = VLLMInferenceModel(**args.human_model.model_config)
+
+    # Detect model type and initialize appropriate model
+    is_openrouter = args.human_model.model_type.lower() == "openrouter"
+
+    if is_openrouter:
+        logging.info("Using OpenRouter API for human model...")
+        llm = AsyncOpenRouterChatLLM(**(args.human_model.model_config.get('openrouter_api') or {}))
+        human_model = OpenRouterAgent(llm=llm, **args.human_model.run.completion_config)
+    else:
+        logging.info("Using vLLM for human model...")
+        human_model = VLLMInferenceModel(**args.human_model.model_config)
     for j, persona in enumerate(personas):
         logging.info(f"Beginning simulations for persona {j}...")
         
@@ -83,9 +94,16 @@ def main(args: DictConfig) -> None:
             logging.info(f"Running batch {batch_index} of {len(conversation_batches)}...")
             histories = [extract_history(c) for c in conversation_batch]
 
-            roleplay_prompts = [f"{BOS_TOKEN}{B_INST} {HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]}\n\n{HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history) }{E_INST}" for prompt, history in zip(prompt_batches[batch_index], histories)]
-
-            human_responses = human_model.batch_prompt(roleplay_prompts, **args.human_model.run.completion_config)
+            if is_openrouter:
+                # OpenRouter uses separate system message and user messages
+                system_message = HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]
+                user_messages = [HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history) for prompt, history in zip(prompt_batches[batch_index], histories)]
+                human_responses = human_model.batch_prompt(system_message, user_messages)
+                human_responses = flatten_list(human_responses)  # Flatten list of lists
+            else:
+                # vLLM uses complete prompts with special tokens
+                roleplay_prompts = [f"{BOS_TOKEN}{B_INST} {HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]}\n\n{HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history) }{E_INST}" for prompt, history in zip(prompt_batches[batch_index], histories)]
+                human_responses = human_model.batch_prompt(roleplay_prompts, **args.human_model.run.completion_config)
 
             appended_conversations = [unfinished_conversation + '\n' + B_INST + f" {human_response} " + E_INST for unfinished_conversation, human_response in zip(conversation_batch, human_responses)]
 
