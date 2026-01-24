@@ -10,6 +10,10 @@
 
 set -euo pipefail
 
+# Clear any pre-existing environment variables that might interfere
+# (These will be properly set by config.env below)
+unset DATA_ROOT PROMPT_PATH PERSONAS_PATH GOLD_PATH SIMULATION_PATH LOGPROBS_PATH WINRATE_PATH VERSION 2>/dev/null || true
+
 # Detect PROJECT_ROOT automatically
 if [[ -n "${SLURM_SUBMIT_DIR:-}" ]]; then
     # SLURM job: user should submit from project root
