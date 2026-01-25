@@ -91,14 +91,19 @@ def main(args: DictConfig) -> None:
         response_file = f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{i}_responses_zero_shot.json'
         qa_responses.append(json.load(open(response_file, 'r')))
 
-    # Sample keys for each turn
-    all_keys = list(qa_responses[0].keys())
-    samples_per_turn = args.n // 3
+    # Sample keys for each turn (each turn has different keys)
+    turn_sizes = [len(qa_responses[i].keys()) for i in range(args.MAX_TURNS)]
+    min_turn_size = min(turn_sizes)
+    samples_per_turn = min(args.n // 3, min_turn_size)
+
+    if samples_per_turn < args.n // 3:
+        logging.warning(f"Requested {args.n//3} samples per turn but only {min_turn_size} available (turn sizes: {turn_sizes}). Using {samples_per_turn} per turn.")
+
     turn_keys = [
-        random.sample(all_keys, samples_per_turn),
-        random.sample(all_keys, samples_per_turn),
-        random.sample(all_keys, samples_per_turn)
+        random.sample(list(qa_responses[i].keys()), samples_per_turn)
+        for i in range(args.MAX_TURNS)
     ]
+    logging.info(f"Sampling {samples_per_turn} responses from each turn for rating")
 
     # Track all scores for aggregate statistics
     all_scores = []
