@@ -19,7 +19,7 @@ run:
     # OpenRouter model identifiers follow the format: provider/model-name
     # See https://openrouter.ai/docs#models for full list
     model: "deepseek/deepseek-v3.2"
-    max_tokens: 300
+    max_tokens: 1000
     temperature: 0
     top_p: 0.95
     n: 1

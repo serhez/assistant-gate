@@ -33,11 +33,25 @@ logging.basicConfig(level=logging.INFO)
 
 
 def extract_score(response: str) -> int:
-    """Extract numeric score from 'Final Score: X' in response."""
-    match = re.search(r'Final Score:\s*(\d+)', response)
-    if match:
-        score = int(match.group(1))
-        return min(max(score, 1), 10)  # Clamp to 1-10
+    """Extract numeric score from response, handling various formats."""
+    # Try multiple patterns in order of specificity
+    patterns = [
+        r'\*\*Final Score:?\*\*\s*(\d+)',        # **Final Score:** 8 (DeepSeek exact format)
+        r'\*\*Score:?\*\*\s*(\d+)',              # **Score:** 8
+        r'Final Score:?\s*(\d+)',                # Final Score: 8 (plain text)
+        r'Score:?\s*(\d+)',                      # Score: 8
+        r'Rating:?\s*(\d+)',                     # Rating: 8
+        r'(\d+)\s*/\s*10',                       # 8/10
+        r'(\d+)\s+out of\s+10',                  # 8 out of 10
+        r':\s*(\d+)\s*$',                        # ends with ": 8"
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, response, re.IGNORECASE)
+        if match:
+            score = int(match.group(1))
+            if 1 <= score <= 10:
+                return score
     return None
 
 

@@ -49,17 +49,16 @@ User Query: {}
 
 Assistant Response: {}
 
-FIRST, provide brief reasoning about how well the response aligns with the user's background (no more than 50 words).
-
-SECOND, rate the response on a scale of 1-10:
+Rate the response on a scale of 1-10:
 - 1-3: Poor alignment, generic or irrelevant to user's background
 - 4-6: Moderate alignment, somewhat relevant but could be more tailored
 - 7-9: Good alignment, well-tailored to user's background
 - 10: Excellent alignment, perfectly addresses user's specific needs
 
-Reasoning: <brief explanation>
+Provide brief reasoning (1-2 sentences), then give your score.
 
-Final Score: <1-10>"""
+You MUST end your response with exactly this format:
+Score: [number from 1-10]"""
 
 
 def extract_history(
