@@ -91,7 +91,4 @@ def main(args: DictConfig) -> None:
     
     
 if __name__ == '__main__':
-    try:
-        fire.Fire(main())
-    except:
-        pass
+    main()

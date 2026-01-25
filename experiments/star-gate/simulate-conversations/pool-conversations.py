@@ -46,7 +46,4 @@ def main(args: DictConfig) -> None:
         json.dump(final_conversations, f)
     
 if __name__ == "__main__":
-    try:
-        fire.Fire(main())
-    except:
-        pass
+    main()

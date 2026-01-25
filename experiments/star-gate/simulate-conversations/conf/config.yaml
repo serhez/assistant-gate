@@ -1,4 +1,5 @@
 defaults:
+  - _self_
   - qa_model: m0
   - human_model: m0
   - split: A # A, B, or test

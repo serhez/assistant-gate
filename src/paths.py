@@ -4,7 +4,7 @@ import os
 # These can be overridden by environment variables (set in config.env)
 # Falls back to original hardcoded paths for backwards compatibility
 
-_DEFAULT_DATA_ROOT = '/scr/andukuri/assistant-gate-hgx'
+_DEFAULT_DATA_ROOT = os.environ.get('DATA_ROOT', '/scr/andukuri/assistant-gate-hgx')
 
 SIMULATION_PATH = os.environ.get('SIMULATION_PATH', f'{_DEFAULT_DATA_ROOT}/simulated-conversations')
 LOGPROBS_PATH = os.environ.get('LOGPROBS_PATH', f'{_DEFAULT_DATA_ROOT}/log-probs')
