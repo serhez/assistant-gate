@@ -43,8 +43,7 @@ cd "${PROJECT_ROOT}/experiments/star-gate/simulate-conversations"
 echo "Pooling conversations for ${CUSTOM_MODEL_NAME}..."
 python pool-conversations.py \
     qa_model=${CUSTOM_MODEL_NAME} \
-    split=test \
-    k=${TOP_K}
+    split=test
 
 echo ""
 echo "Done! Pooled conversations at: ${SIMULATION_PATH}/${VERSION}/${CUSTOM_MODEL_NAME}/"
