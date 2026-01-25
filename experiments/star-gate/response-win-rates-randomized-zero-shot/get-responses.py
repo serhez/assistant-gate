@@ -60,10 +60,19 @@ def main(args: DictConfig) -> None:
     for i in range(1, args.MAX_TURNS + 1):
         turns_conversations.append(json.load(open(f"{SIMULATION_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{i}.json", "r")))
     pooled_conversations = json.load(open(f"{SIMULATION_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}{f'_top-k-{args.k}' if args.k > 0 else ''}.json", "r"))
-    
-    
+
+    # Calculate safe n based on available data
+    turn_sizes = [len(turns_conversations[i].keys()) for i in range(args.MAX_TURNS)]
+    min_turn_size = min(turn_sizes)
+    max_safe_n = 3 * min_turn_size
+
+    actual_n = min(args.n, max_safe_n)
+    if actual_n < args.n:
+        logging.warning(f"Requested n={args.n} but only {max_safe_n} samples available (turn sizes: {turn_sizes}). Using n={actual_n}.")
+    logging.info(f"Sampling {actual_n//3} conversations from each turn (total n={actual_n})")
+
     tokenizer = AutoTokenizer.from_pretrained(**args.qa_model.tokenizer_config)
-    turns_1, turns_2, turns_3 = random.sample(list(turns_conversations[0].keys()), args.n//3), random.sample(list(turns_conversations[1].keys()), args.n//3), random.sample(list(turns_conversations[2].keys()), args.n//3)
+    turns_1, turns_2, turns_3 = random.sample(list(turns_conversations[0].keys()), actual_n//3), random.sample(list(turns_conversations[1].keys()), actual_n//3), random.sample(list(turns_conversations[2].keys()), actual_n//3)
     all_qa_responses = list()
     for t_num, group in enumerate([turns_1, turns_2, turns_3]):
         # group is a list of keys f'prompt-{i} persona-{j}' where prompt and persona can be used to index the prompts and personas list above
