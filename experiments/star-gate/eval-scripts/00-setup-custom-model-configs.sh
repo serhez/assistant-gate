@@ -200,7 +200,6 @@ run:
     top_p: 1
     top_k: -1
     max_new_tokens: 700
-    use_beam_search: false
     presence_penalty: 0
     frequency_penalty: 0
     num_return_sequences: 1
@@ -243,7 +242,6 @@ run:
     top_p: 1
     top_k: -1
     max_new_tokens: 700
-    use_beam_search: false
     presence_penalty: 0
     frequency_penalty: 0
     num_return_sequences: 1
@@ -286,7 +284,6 @@ run:
     top_p: 1
     top_k: -1
     max_new_tokens: 700
-    use_beam_search: false
     presence_penalty: 0
     frequency_penalty: 0
     num_return_sequences: 1
