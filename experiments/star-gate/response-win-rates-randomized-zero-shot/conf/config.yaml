@@ -12,5 +12,5 @@ ROLES:
 
 MAX_TURNS: 3
 k: 0
-n: 300
+n: 500
 N_ITER: 4

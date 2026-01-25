@@ -101,23 +101,42 @@ def main(args: DictConfig) -> None:
     # Try to extract name from persona text (look for "Name: X" or "My name is X" patterns)
     # Fall back to generic names if extraction fails
     names = []
+    extraction_failures = []
     for i, persona in enumerate(flattened_completions):
         name = None
         # Try common patterns for name extraction
-        import re
-        # Pattern: "Name: John Smith" or "name: John"
-        match = re.search(r'[Nn]ame[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)', persona)
+        # Pattern 1: "I'm John" at the start (matches the few-shot format)
+        # Handle both straight and curly apostrophes
+        match = re.search(r"^I[''`]m\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)", persona)
         if match:
             name = match.group(1).strip()
-        # Pattern: "My name is John" or "I'm John"
+        # Pattern 2: "My name is John" anywhere
         if not name:
-            match = re.search(r"(?:My name is|I'm|I am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)", persona)
+            match = re.search(r"[Mm]y name is\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)", persona)
+            if match:
+                name = match.group(1).strip()
+        # Pattern 3: "I am John" anywhere
+        if not name:
+            match = re.search(r"I am\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)", persona)
+            if match:
+                name = match.group(1).strip()
+        # Pattern 4: "Name: John Smith" or "name: John"
+        if not name:
+            match = re.search(r'[Nn]ame[:\s]+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)', persona)
             if match:
                 name = match.group(1).strip()
         # Fallback to generic name
         if not name:
-            name = f"User {i+1}"
+            name = f"Person {i+1}"
+            extraction_failures.append(i)
+            logging.warning(f"Name extraction failed for persona {i}, using fallback: {name}")
+            logging.warning(f"  Persona starts with: {persona[:100]}...")
         names.append(name)
+
+    if extraction_failures:
+        logging.warning(f"Name extraction failed for {len(extraction_failures)}/{len(flattened_completions)} personas")
+    else:
+        logging.info(f"Successfully extracted names for all {len(flattened_completions)} personas")
 
     if not os.path.exists(f'{PERSONAS_PATH}/{VERSION_2_BSFT}'):
         os.makedirs(f'{PERSONAS_PATH}/{VERSION_2_BSFT}')
