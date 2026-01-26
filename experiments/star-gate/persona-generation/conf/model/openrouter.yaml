@@ -20,5 +20,5 @@ run:
     # See https://openrouter.ai/docs#models for full list
     model: "deepseek/deepseek-v3.2"
     max_tokens: 400
-    temperature: 1.5
+    temperature: 1.0
     top_p: 0.95
