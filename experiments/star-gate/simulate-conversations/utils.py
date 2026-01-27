@@ -105,6 +105,12 @@ RULES:
  
 REMEMBER: Your entire response must be exactly ONE question. Not two. Not three. Not more than one. ONLY ONE.
 
+BAD (multiple questions):
+"What genre do you prefer? Do you like fiction? How long should it be?"
+
+GOOD (single question):
+"What kind of topics or themes interest you most?"
+
 The user's request: {}
 
 Your single question:
