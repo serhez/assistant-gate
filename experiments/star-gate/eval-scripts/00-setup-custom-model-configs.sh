@@ -64,14 +64,16 @@ run:
   verbose: false
   initial_completion_config:
     do_sample: true
-    temperature: 0.9
-    top_p: 0.9
+    temperature: 0.7
+    top_p: 0.8
+    top_k: 20
     max_new_tokens: 700
     num_return_sequences: ${NUM_RETURN_SEQUENCES}
   completion_config:
     do_sample: true
-    temperature: 0.9
-    top_p: 0.9
+    temperature: 0.7
+    top_p: 0.8
+    top_k: 20
     max_new_tokens: 700
     num_return_sequences: 1
 EOF
