@@ -17,6 +17,7 @@ import signal
 from collections import defaultdict
 from datasets import load_dataset, Dataset
 from vllm.distributed.parallel_state import destroy_model_parallel
+from transformers import AutoTokenizer
 
 from utils import *
 
@@ -31,6 +32,51 @@ from paths import *
 
 # logging
 logging.basicConfig(level=logging.INFO)
+
+# Conversation separator - must match generate-qa.py
+TURN_SEP = "<|TURN_SEP|>"
+MSG_SEP = "<|MSG_SEP|>"
+
+
+def format_conversation_for_storage(messages: list) -> str:
+    """Store conversation in a model-agnostic format."""
+    parts = []
+    for msg in messages:
+        parts.append(f"{msg['role']}{MSG_SEP}{msg['content']}")
+    return TURN_SEP.join(parts)
+
+
+def parse_stored_conversation(conversation: str) -> tuple:
+    """Parse a stored conversation back into original prompt and messages."""
+    original_prompt = ""
+    messages = []
+
+    if conversation.startswith("ORIGINAL_PROMPT:"):
+        parts = conversation.split(TURN_SEP, 1)
+        original_prompt = parts[0].replace("ORIGINAL_PROMPT:", "").strip()
+        conv_part = parts[1] if len(parts) > 1 else ""
+    else:
+        # Legacy format - try to extract from conversation
+        conv_part = conversation
+
+    turns = conv_part.split(TURN_SEP)
+    for turn in turns:
+        if MSG_SEP in turn:
+            role, content = turn.split(MSG_SEP, 1)
+            messages.append({"role": role.strip(), "content": content.strip()})
+
+    return original_prompt, messages
+
+
+def format_history_for_human(messages: list) -> str:
+    """Format conversation history for human role-player prompt."""
+    history_parts = []
+    for msg in messages:
+        if msg["role"] == "user":
+            history_parts.append(f"You: {msg['content']}")
+        else:
+            history_parts.append(f"AI Assistant: {msg['content']}")
+    return "\n".join(history_parts)
 
 
 @hydra.main(version_base=None, config_path="conf", config_name='config')
@@ -92,22 +138,51 @@ def main(args: DictConfig) -> None:
 
         for batch_index, conversation_batch in enumerate(conversation_batches):
             logging.info(f"Running batch {batch_index} of {len(conversation_batches)}...")
-            histories = [extract_history(c) for c in conversation_batch]
+
+            # Parse stored conversations to extract messages and original prompts
+            parsed_data = [parse_stored_conversation(c) for c in conversation_batch]
+            original_prompts_batch = [p[0] for p in parsed_data]
+            messages_batch = [p[1] for p in parsed_data]
+
+            # Format history for human role-player
+            histories = [format_history_for_human(msgs) for msgs in messages_batch]
+
+            # Get the last assistant message (the question to answer)
+            last_questions = []
+            for msgs in messages_batch:
+                last_q = ""
+                for msg in reversed(msgs):
+                    if msg["role"] == "assistant":
+                        last_q = msg["content"]
+                        break
+                last_questions.append(last_q)
 
             if is_openrouter:
                 # OpenRouter uses separate system message and user messages
                 system_message = HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]
-                user_messages = [HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history) for prompt, history in zip(prompt_batches[batch_index], histories)]
+                user_messages = [
+                    HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history)
+                    for prompt, history in zip(prompt_batches[batch_index], histories)
+                ]
                 human_responses = human_model.batch_prompt(system_message, user_messages)
                 human_responses = flatten_list(human_responses)  # Flatten list of lists
             else:
-                # vLLM uses complete prompts with special tokens
-                roleplay_prompts = [f"{BOS_TOKEN}{B_INST} {HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]}\n\n{HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history) }{E_INST}" for prompt, history in zip(prompt_batches[batch_index], histories)]
+                # vLLM - use tokenizer's chat template if available
+                roleplay_prompts = [
+                    f"{BOS_TOKEN}{B_INST} {HUMAN_SYS_MSGS[args.HUMAN_SYS_PROMPT_IDX]}\n\n{HUMAN_PROMPTS[args.HUMAN_PROMPT_IDX].format(persona, prompt, history)}{E_INST}"
+                    for prompt, history in zip(prompt_batches[batch_index], histories)
+                ]
                 human_responses = human_model.batch_prompt(roleplay_prompts, **args.human_model.run.completion_config)
 
-            appended_conversations = [unfinished_conversation + '\n' + B_INST + f" {human_response} " + E_INST for unfinished_conversation, human_response in zip(conversation_batch, human_responses)]
+            # Append human responses to conversations in model-agnostic format
+            updated_conversations = []
+            for orig_prompt, msgs, human_response in zip(original_prompts_batch, messages_batch, human_responses):
+                # Add human response as a user message
+                updated_msgs = msgs + [{"role": "user", "content": human_response}]
+                stored_conv = f"ORIGINAL_PROMPT: {orig_prompt}{TURN_SEP}{format_conversation_for_storage(updated_msgs)}"
+                updated_conversations.append(stored_conv)
 
-            final_conversations.extend(appended_conversations)
+            final_conversations.extend(updated_conversations)
             
         
         final_conversations = chunk_list(final_conversations, args.qa_model.run.initial_completion_config.num_return_sequences)

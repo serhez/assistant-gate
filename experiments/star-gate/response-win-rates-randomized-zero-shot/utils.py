@@ -4,7 +4,12 @@ import logging
 import random
 
 
+# Legacy Mistral format tokens (kept for backward compatibility)
 B_INST, E_INST, BOS_TOKEN, EOS_TOKEN = '[INST]', '[/INST]', '<s>', '</s>'
+
+# Model-agnostic conversation format separators
+TURN_SEP = "<|TURN_SEP|>"
+MSG_SEP = "<|MSG_SEP|>"
 
 # =============================================================================
 # Pairwise comparison prompts (legacy, kept for reference)

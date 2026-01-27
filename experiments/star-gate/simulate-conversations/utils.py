@@ -1,9 +1,53 @@
-from typing import List
+from typing import List, Tuple
 import random
 
 
-# SPECIAL TOKENS
+# SPECIAL TOKENS (legacy Mistral format - kept for backward compatibility)
 BOS_TOKEN, EOS_TOKEN, B_INST, E_INST = '<s>', '</s>', '[INST]', '[/INST]'
+
+# Model-agnostic conversation format separators
+TURN_SEP = "<|TURN_SEP|>"
+MSG_SEP = "<|MSG_SEP|>"
+
+
+def format_conversation_for_storage(messages: list) -> str:
+    """Store conversation in a model-agnostic format.
+
+    Format: role<|MSG_SEP|>content<|TURN_SEP|>role<|MSG_SEP|>content...
+    """
+    parts = []
+    for msg in messages:
+        parts.append(f"{msg['role']}{MSG_SEP}{msg['content']}")
+    return TURN_SEP.join(parts)
+
+
+def parse_stored_conversation_new(conversation: str) -> Tuple[str, list]:
+    """Parse a stored conversation in the new model-agnostic format.
+
+    Returns: (original_prompt, messages_list)
+    """
+    original_prompt = ""
+    messages = []
+
+    if conversation.startswith("ORIGINAL_PROMPT:"):
+        parts = conversation.split(TURN_SEP, 1)
+        original_prompt = parts[0].replace("ORIGINAL_PROMPT:", "").strip()
+        conv_part = parts[1] if len(parts) > 1 else ""
+    else:
+        conv_part = conversation
+
+    turns = conv_part.split(TURN_SEP)
+    for turn in turns:
+        if MSG_SEP in turn:
+            role, content = turn.split(MSG_SEP, 1)
+            messages.append({"role": role.strip(), "content": content.strip()})
+
+    return original_prompt, messages
+
+
+def is_new_format(conversation: str) -> bool:
+    """Check if conversation is in the new model-agnostic format."""
+    return TURN_SEP in conversation and MSG_SEP in conversation
 
 
 QA_PROMPTS = [
