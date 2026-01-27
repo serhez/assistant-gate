@@ -205,6 +205,10 @@ def main(args: DictConfig) -> None:
 
         with open(f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{t_num + 1}_responses_zero_shot.json', 'w') as f:
             json.dump(dict(zip(group, cleaned_responses)), f)
+
+        # Also save the full prompts for debugging/verification
+        with open(f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{t_num + 1}_prompts.json', 'w') as f:
+            json.dump(dict(zip(group, group_answer_prompts)), f)
        
     
     

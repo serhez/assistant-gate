@@ -101,9 +101,17 @@ def main(args: DictConfig) -> None:
 
     # Load responses for the single model
     qa_responses = []
+    qa_full_prompts = []
     for i in range(1, args.MAX_TURNS + 1):
         response_file = f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{i}_responses_zero_shot.json'
         qa_responses.append(json.load(open(response_file, 'r')))
+
+        # Load full prompts if available (for debugging/verification)
+        prompts_file = f'{WINRATE_PATH}/{VERSION_2_BSFT}/{args.qa_model.shortname}/{args.split.name}_turn-{i}_prompts.json'
+        if os.path.exists(prompts_file):
+            qa_full_prompts.append(json.load(open(prompts_file, 'r')))
+        else:
+            qa_full_prompts.append({})
 
     # Use ALL available responses (no sampling)
     turn_sizes = [len(qa_responses[i].keys()) for i in range(args.MAX_TURNS)]
@@ -133,6 +141,7 @@ def main(args: DictConfig) -> None:
         group_prompts = [prompts[idx] for idx in group_prompt_indices]
         group_personas = [personas[idx] for idx in group_persona_indices]
         group_responses = [qa_responses[t_num][key] for key in group]
+        group_full_prompts = [qa_full_prompts[t_num].get(key, "") for key in group]
 
         # Create rating prompts using single-model template
         rating_prompts = [
@@ -183,6 +192,7 @@ def main(args: DictConfig) -> None:
                 "turn": turn,
                 "prompt": group_prompts[idx],
                 "persona": group_personas[idx],
+                "full_prompt_to_model": group_full_prompts[idx],
                 "model_response": group_responses[idx],
                 "oracle_response": oracle_response,
                 "score": score,
