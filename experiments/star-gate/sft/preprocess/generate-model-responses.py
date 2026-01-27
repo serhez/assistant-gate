@@ -62,7 +62,7 @@ def main(args: DictConfig) -> None:
             turns[-1] = turns[-1].strip() + f'\n\n{turns[0].strip()}'  ## add the prompt to the end of the conversation again to prompt the model to answer
             turns[0] = MODEL_RESPONSE_PROMPTS[args.MODEL_RESPONSE_IDX] + '\n\n' + f"My name is {names[j].strip()}.\n\n{turns[0].strip()}"
             messages = [{"role": args.ROLES[i % 2], "content": turn} for i, turn in enumerate(turns)]
-            persona_conversations.append(tokenizer.decode(tokenizer.apply_chat_template(messages)))
+            persona_conversations.append(tokenizer.decode(tokenizer.apply_chat_template(messages, enable_thinking=False)))
 
         #persona_conversations = [BOS_TOKEN + B_INST + MODEL_RESPONSE_PROMPTS[args.MODEL_RESPONSE_IDX] + extract_history(c) for c in flatten_list(persona_conversations)]
         conversation_batches = list(batch_list(persona_conversations, args.qa_model.run.batch_size))  # Create batches of prompts        

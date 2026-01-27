@@ -176,7 +176,7 @@ def main(args: DictConfig) -> None:
             if messages:
                 messages[-1]["content"] += f"\n\nNow please provide a helpful answer to my original question: {original_prompt}"
 
-            final_prompt = tokenizer.decode(tokenizer.apply_chat_template(messages, add_generation_prompt=True))
+            final_prompt = tokenizer.decode(tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False))
             group_answer_prompts.append(final_prompt)
 
             # Log first prompt of each turn for debugging

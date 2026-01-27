@@ -82,7 +82,7 @@ def main(args: DictConfig) -> None:
             turns[0] = f"My name is {names[group_persona_indices[c_idx]]}.\n\n{turns[0]}"
             messages = [{"role": args.ROLES[i % 2], "content": turn} for i, turn in enumerate(turns)]
             
-            group_answer_prompts.append(tokenizer.decode(tokenizer.apply_chat_template(messages)))
+            group_answer_prompts.append(tokenizer.decode(tokenizer.apply_chat_template(messages, enable_thinking=False)))
         
         group_answer_responses = answer_model.batch_prompt(group_answer_prompts, **args.answer_model.run.completion_config)
         

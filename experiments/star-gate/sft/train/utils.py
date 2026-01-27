@@ -77,7 +77,7 @@ def _tokenize_fn(
     
     enumerated = list()
     for i in range(len(messages) + 1):
-        enumerated.append(tokenizer.apply_chat_template(messages[:i], return_tensors='pt', padding='longest', max_length=tokenizer.model_max_length, truncation=True))
+        enumerated.append(tokenizer.apply_chat_template(messages[:i], return_tensors='pt', padding='longest', max_length=tokenizer.model_max_length, truncation=True, enable_thinking=False))
     enumerated = [e[0] for e in enumerated][1:]
     input_ids = copy.deepcopy(enumerated[-1])
     

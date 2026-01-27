@@ -45,7 +45,7 @@ MSG_SEP = "<|MSG_SEP|>"
 def format_prompt_for_model(tokenizer, system_msg: str, user_msg: str) -> str:
     """Format a prompt using the model's native chat template."""
     messages = [{"role": "user", "content": f"{system_msg}\n\n{user_msg}"}]
-    return tokenizer.decode(tokenizer.apply_chat_template(messages, add_generation_prompt=True))
+    return tokenizer.decode(tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False))
 
 
 def format_conversation_for_storage(messages: list) -> str:
@@ -153,7 +153,7 @@ def main(args: DictConfig) -> None:
 
                     # Format for model using chat template
                     formatted_prompt = tokenizer.decode(
-                        tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+                        tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False)
                     )
                     formatted_prompts.append(formatted_prompt)
 
@@ -199,7 +199,7 @@ def main(args: DictConfig) -> None:
                     user_content = system_content.format(names[j], prompt)
                     messages = [{"role": "user", "content": user_content}]
                     formatted_prompt = tokenizer.decode(
-                        tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+                        tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False)
                     )
                     initial_prompts.append(formatted_prompt)
                     initial_messages.append({"user_prompt": prompt, "messages": messages})
