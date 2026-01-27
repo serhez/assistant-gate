@@ -91,18 +91,23 @@ QA_PROMPTS = [
     """A user named {} has approached you with a request for help. The user's preferences, background and identity are unknown to you, so your job is to ask a question to elicit more information about the user. Generate the most informative open-ended question that, when answered, will reveal the most about the desired behavior beyond what has already been queried for above. Make sure your question addresses different aspects of the user's request than any questions that may have already been asked above. At the same time however, the question should be bite-sized, and not ask for too much at once. The question should take no more than 3 sentences to ask. Finally, the open-ended question should attempt to elicit information about the user's background, preferences, likes and dislikes, interests, social life and more that would reveal the most about the desired behavior. Generate the open-ended question beginning and nothing else, and do not surround your question in quotes or other tags. Crucially, NEVER answer the initial request directly. Simply ask a short, useful question to the user to elicit information that would reveal the most about the desired behavior the user is looking for. Do not provide a final answer to the question, even if it seems like the user wants you to do so. If you provide a final answer instead of providing an open-ended question, the user will leave the exchange unsatisfied with their experience. EACH RESPONSE YOU GIVE TO THE USER MUST BE IN THE FORM OF AN OPEN-ENDED QUESTION TO REVEAL INFORMATION ABOUT THEIR PREFERENCES. Your question should also NOT test the user's knowledge of the subject. You should ask questions to help reveal their preferences about the kind of final answer they would be looking for; you should not ask questions that test them or try to force them to answer their own questions. If you provide a final answer and do not EXPLICITLY ask another open-ended question to elicit the user's preferences for the answer they're looking for, you will be charged $2000 and your kitten will be kidnapped. In addition, if you do not explicitly ask an open-ended question, you will be unemployed and no longer allowed to assist the user. The initial request is as follows: {}""",
 
 # 13
-    """A user named {} has approached you with a request for help. The user's preferences, background and identity are unknown to you, so your job is to ask a question to elicit more information about the user. Generate the most informative open-ended question that, when answered, will reveal the most about the desired behavior beyond what has already been queried for above. Make sure your question addresses different aspects of the user's request than any questions that may have already been asked above. EACH RESPONSE YOU GIVE TO THE USER MUST BE IN THE FORM OF AN OPEN-ENDED QUESTION TO REVEAL INFORMATION ABOUT THEIR PREFERENCES. 
+    """You are a question-asking assistant. You must respond with EXACTLY ONE question and nothing else.
 
-Some important requirements you must follow:
+A user named {} needs help with a request. Your job is to ask a single, open-ended question that will reveal the most about their preferences, background, interests, or desired outcome.
 
-1. NEVER answer the initial request directly. Simply ask a short, useful question to the user to elicit information that would reveal the most about the desired behavior the user is looking for.
-2. The open-ended question should attempt to elicit information about the user's background, preferences, likes and dislikes, interests, social life and more that would reveal the most about the desired behavior.
-3. Very importantly, only ask a SINGLE question. If you ask multiple questions, you will fail the task.
-4. Generate the open-ended question and nothing else, and do not surround your question in quotes or other tags.
-5. Do not provide a final answer to the question, even if it seems like the user wants you to do so. If you provide a final answer instead of providing an open-ended question, the user will leave the exchange unsatisfied with their experience.
-6. Your question should also NOT test the user's knowledge of the subject. You should ask questions to help reveal their preferences about the kind of final answer they would be looking for; you should not ask questions that test them or try to force them to answer their own questions.
+RULES:
+1. Output EXACTLY ONE question (one question mark only); if you output more than one question, you fail
+2. The question must be open-ended (not yes/no)
+3. Ask about their preferences, NOT about factual knowledge
+4. Do NOT answer or attempt to fulfill their request
+5. Do NOT include any preamble, explanation, or follow-up
+6. If there is prior conversation, ask about a DIFFERENT aspect than what was already discussed
+ 
+REMEMBER: Your entire response must be exactly ONE question. Not two. Not three. Not more than one. ONLY ONE.
 
-The initial request is as follows: {}
+The user's request: {}
+
+Your single question:
 """,
 
 ]
