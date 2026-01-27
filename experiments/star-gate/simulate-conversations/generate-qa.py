@@ -143,6 +143,12 @@ def main(args: DictConfig) -> None:
                         messages = parse_stored_conversation(conv)
 
                     original_prompts_list.append(original_prompt)
+
+                    # Add reminder to ask ONE question for turns 2-3
+                    # (Turn 1 has the instruction in QA_PROMPTS, but subsequent turns need reinforcement)
+                    if messages and messages[-1]["role"] == "user":
+                        messages[-1]["content"] += "\n\n[Remember: Ask exactly ONE follow-up question about a DIFFERENT aspect. Do not ask multiple questions.]"
+
                     parsed_messages_list.append(messages)
 
                     # Format for model using chat template
