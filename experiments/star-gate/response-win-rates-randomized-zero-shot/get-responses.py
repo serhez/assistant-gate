@@ -154,9 +154,9 @@ def main(args: DictConfig) -> None:
     all_qa_responses = list()
     for t_num, group in enumerate([turns_1, turns_2, turns_3]):
         # group is a list of keys f'prompt-{i} persona-{j}' where prompt and persona can be used to index the prompts and personas list above
-        
+
         conversations = [random.choice(pooled_conversations[key]) for key in group]
-        
+
         group_answer_prompts = list()
         group_prompt_indices = [int(key[key.find('prompt-') + len('prompt-'):key.find('persona-')].strip()) for key in group]
         group_persona_indices = [int(key[key.find('persona-') + len('persona-'):].strip()) for key in group]
@@ -168,24 +168,48 @@ def main(args: DictConfig) -> None:
             if not original_prompt:
                 original_prompt = prompts[group_prompt_indices[c_idx]]
 
-            # Prepend user's name to the first message
-            if messages and messages[0]["role"] == "user":
-                messages[0]["content"] = f"My name is {names[group_persona_indices[c_idx]]}.\n\n{messages[0]['content']}"
+            user_name = names[group_persona_indices[c_idx]]
 
-            # Append original prompt to the last message to prompt for final answer
-            if messages:
-                messages[-1]["content"] += f"\n\nNow please provide a helpful answer to my original question: {original_prompt}"
+            # Build a clean prompt for response generation
+            # IMPORTANT: Do NOT include the QA prompt instructions - they confuse the model
+            # Instead, present the conversation as context and clearly describe the task
 
-            final_prompt = tokenizer.decode(tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False))
+            # Extract just the Q&A exchanges (skip the QA prompt instructions in the first message)
+            qa_exchanges = []
+            for i, msg in enumerate(messages):
+                if msg["role"] == "assistant":
+                    qa_exchanges.append(f"You: {msg['content']}")
+                elif msg["role"] == "user" and i > 0:  # Skip first user message (contains QA prompt)
+                    qa_exchanges.append(f"{user_name}: {msg['content']}")
+
+            conversation_text = "\n\n".join(qa_exchanges)
+
+            # Create a new prompt structure for response generation
+            response_prompt = f"""You are a helpful assistant. A user named {user_name} asked you for help with the following request:
+
+"{original_prompt}"
+
+During your conversation, you asked clarifying questions to better understand their needs. Here is the conversation:
+
+{conversation_text}
+
+Based on this conversation, provide a helpful, personalized response to {user_name}'s original request. Consider the information they shared about their background, preferences, and needs.
+
+Your response should be concise but informative: approximately 100-150 words (1-2 short paragraphs). Give a direct, useful answer that addresses their request while incorporating relevant details from the conversation."""
+
+            # Format as a single user message
+            final_messages = [{"role": "user", "content": response_prompt}]
+            final_prompt = tokenizer.decode(tokenizer.apply_chat_template(final_messages, add_generation_prompt=True, enable_thinking=False))
             group_answer_prompts.append(final_prompt)
 
             # Log first prompt of each turn for debugging
             if c_idx == 0:
                 logging.info(f"=== Example prompt for turn {t_num + 1} ===")
-                logging.info(f"Original prompt: {original_prompt[:100]}...")
-                logging.info(f"Number of messages: {len(messages)}")
-                logging.info(f"Messages structure: {[(m['role'], len(m['content'])) for m in messages]}")
-                logging.info(f"Final prompt (first 1500 chars):\n{final_prompt[:1500]}")
+                logging.info(f"User: {user_name}")
+                logging.info(f"Original request: {original_prompt[:100]}...")
+                logging.info(f"Number of Q&A exchanges: {len(qa_exchanges)}")
+                logging.info(f"Conversation text:\n{conversation_text[:500]}...")
+                logging.info(f"Final prompt (first 2000 chars):\n{final_prompt[:2000]}")
                 logging.info(f"=== End example prompt ===")
 
         group_answer_responses = answer_model.batch_prompt(group_answer_prompts, **args.answer_model.run.completion_config)
